@@ -58,16 +58,10 @@ public class UserController {
     }
     @GetMapping("/users")
     public List<User> getAllUsers() {
-        HashMap<Long, Optional<List<Trip>>> trips = new HashMap<>();
         return userService.getAllUsers()
                 .stream().peek(user -> {
-                    Optional<List<Trip>> userTrips = trips.getOrDefault(user.getId(), Optional.empty());
-                    if(userTrips.isEmpty()) {
-                        userTrips = Optional.of(getUserTrips(user.getId()));
-                        trips.put(user.getId(), userTrips);
-                    }
-
-                    user.setTrips(userTrips.get());
+                    List<Trip> userTrips = getUserTrips(user.getId());
+                    user.setTrips(userTrips);
                 })
                 .toList();
     }
