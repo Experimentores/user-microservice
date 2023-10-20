@@ -1,5 +1,6 @@
 package com.edu.pe.usermicroservice.controller;
 
+import com.edu.pe.usermicroservice.Trip.ITripClient;
 import com.edu.pe.usermicroservice.exception.ValidationException;
 import com.edu.pe.usermicroservice.model.User;
 import com.edu.pe.usermicroservice.service.UserService;
@@ -18,10 +19,15 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
 
+    private final ITripClient iTripClient;
+
+
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, ITripClient iTripClient) {
         this.userService = userService;
+        this.iTripClient = iTripClient;
     }
+
     @PostMapping("/user/authenticate")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
