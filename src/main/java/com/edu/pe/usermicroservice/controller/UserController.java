@@ -104,8 +104,9 @@ public class UserController {
     }
     @DeleteMapping("users/{id}")
     @Transactional
-    public void deleteUser(@PathVariable int id) {
-        userService.deleteUser(id);
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(Math.toIntExact(id));
+        iTripClient.deleteTripByUserId(id);
     }
 
 
