@@ -18,7 +18,7 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "username", nullable = false, length = 30)
     private String username;
@@ -38,9 +38,7 @@ public class User {
     @Column(name = "phone", nullable = false, length = 9)
     private String phone;
 
-    /*@JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Trip> trips;*/
-
+    @Transient
+    private List<Trip> trips;
 
 }

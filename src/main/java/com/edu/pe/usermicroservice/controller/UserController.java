@@ -2,17 +2,17 @@ package com.edu.pe.usermicroservice.controller;
 
 import com.edu.pe.usermicroservice.Trip.ITripClient;
 import com.edu.pe.usermicroservice.exception.ValidationException;
+import com.edu.pe.usermicroservice.model.Trip;
 import com.edu.pe.usermicroservice.model.User;
 import com.edu.pe.usermicroservice.service.UserService;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/tripstore/v1")
@@ -46,25 +46,61 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
+
+    private List<Trip> getUserTrips(Long userId) {
+        try {
+            ResponseEntity<List<Trip>> response = iTripClient.searchTrip(userId);
+            if(response.getStatusCode() == HttpStatus.OK)
+                return response.getBody();
+        } catch (Exception ignored) {}
+
+        return new ArrayList<>();
+    }
     @GetMapping("/users")
     public List<User> getAllUsers() {
-        return userService.getAllUsers();
+        HashMap<Long, Optional<List<Trip>>> trips = new HashMap<>();
+        return userService.getAllUsers()
+                .stream().peek(user -> {
+                    Optional<List<Trip>> userTrips = trips.getOrDefault(user.getId(), Optional.empty());
+                    if(userTrips.isEmpty()) {
+                        userTrips = Optional.of(getUserTrips(user.getId()));
+                        trips.put(user.getId(), userTrips);
+                    }
+
+                    user.setTrips(userTrips.get());
+                })
+                .toList();
     }
+
+    private User getUserWithTrips(User user) {
+        user.setTrips(getUserTrips(user.getId()));
+        return user;
+    }
+
     @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable int id) {
-        return userService.getUserById(id);
+    public User getUserById(@PathVariable Long id, @RequestParam(required = false)String getTrips) {
+        if(getTrips != null) {
+            getTrips = "true";
+        }
+
+        User user = userService.getUserById(Math.toIntExact(id));
+        if(Objects.equals(getTrips, "true"))
+            return getUserWithTrips(user);
+        return user;
     }
     @PostMapping("/users")
     @Transactional
-    public User createUser(@RequestBody  User user) {
+    public User createUser(@RequestBody User user) {
         validateUser(user);
-        return userService.createUser(user);
+        User created = userService.createUser(user);
+        return getUserWithTrips(created);
     }
     @PutMapping("users/{id}")
     @Transactional
     public User updateUser(@PathVariable int id, @RequestBody User updatedUser) {
         validateUser(updatedUser);
-        return userService.updateUser(id, updatedUser);
+        User user = userService.updateUser(id, updatedUser);
+        return getUserWithTrips(user);
     }
     @DeleteMapping("users/{id}")
     @Transactional
