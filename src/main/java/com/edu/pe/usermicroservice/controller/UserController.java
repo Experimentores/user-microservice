@@ -79,12 +79,12 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     public User getUserById(@PathVariable Long id, @RequestParam(required = false)String getTrips) {
-        if(getTrips != null) {
+        if(getTrips == null) {
             getTrips = "true";
         }
 
         User user = userService.getUserById(Math.toIntExact(id));
-        if(Objects.equals(getTrips, "true"))
+        if(getTrips.equals("true"))
             return getUserWithTrips(user);
         return user;
     }
