@@ -1,6 +1,8 @@
 package com.edu.pe.usermicroservice.users.controller;
 
 import com.crudjpa.controller.CrudController;
+import com.edu.pe.usermicroservice.orders.client.IOrderClient;
+import com.edu.pe.usermicroservice.orders.domain.model.Order;
 import com.edu.pe.usermicroservice.trips.client.ITripClient;
 import com.edu.pe.usermicroservice.trips.domain.model.Trip;
 import com.edu.pe.usermicroservice.users.domain.model.User;
@@ -28,11 +30,13 @@ import java.util.Optional;
 public class UsersController extends CrudController<User, Long, UserResource, CreateUserResource, UpdateUserResource> {
     private final IUserService userService;
     private final ITripClient tripClient;
+    private final IOrderClient orderClient;
 
-    public UsersController(IUserService userService, UserMapper mapper, ITripClient tripClient) {
+    public UsersController(IUserService userService, UserMapper mapper, ITripClient tripClient, IOrderClient orderClient) {
         super(userService, mapper);
         this.userService = userService;
         this.tripClient = tripClient;
+        this.orderClient = orderClient;
     }
 
     private void validateUserExists(String username) {
@@ -65,10 +69,21 @@ public class UsersController extends CrudController<User, Long, UserResource, Cr
         return new ArrayList<>();
     }
 
+    private List<Order> getUserOrders(Long userId) {
+        try {
+            ResponseEntity<List<Order>> response = orderClient.getOrdersByUserId(userId);
+            if(response.getStatusCode() == HttpStatus.OK)
+                return response.getBody();
+        } catch (Exception ignored) {}
+
+        return List.of();
+    }
+
     @Override
     protected UserResource fromModelToResource(User user) {
         UserResource resource = super.fromModelToResource(user);
         resource.setTrips(getUserTrips(user.getId()));
+        resource.setOrders(getUserOrders(user.getId()));
         return resource;
     }
 
@@ -76,7 +91,6 @@ public class UsersController extends CrudController<User, Long, UserResource, Cr
     public ResponseEntity<UserResource> getUserById(@PathVariable Long id) {
         return getById(id);
     }
-
 
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
