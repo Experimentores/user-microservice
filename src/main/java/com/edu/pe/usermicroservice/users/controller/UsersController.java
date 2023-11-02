@@ -1,6 +1,7 @@
 package com.edu.pe.usermicroservice.users.controller;
 
 import com.crudjpa.controller.CrudController;
+import com.crudjpa.enums.MapFrom;
 import com.edu.pe.usermicroservice.orders.client.IOrderClient;
 import com.edu.pe.usermicroservice.orders.domain.model.Order;
 import com.edu.pe.usermicroservice.trips.client.ITripClient;
@@ -80,10 +81,13 @@ public class UsersController extends CrudController<User, Long, UserResource, Cr
     }
 
     @Override
-    protected UserResource fromModelToResource(User user) {
+    protected UserResource fromModelToResource(User user, MapFrom from) {
         UserResource resource = super.fromModelToResource(user);
-        resource.setTrips(getUserTrips(user.getId()));
-        resource.setOrders(getUserOrders(user.getId()));
+
+        if(from != MapFrom.ANY && from != MapFrom.CREATE) {
+            resource.setTrips(getUserTrips(user.getId()));
+            resource.setOrders(getUserOrders(user.getId()));
+        }
         return resource;
     }
 
@@ -130,6 +134,6 @@ public class UsersController extends CrudController<User, Long, UserResource, Cr
         if(user.isEmpty())
             throw new InvalidRequestException("Invalid credentials");
 
-        return ResponseEntity.ok(this.fromModelToResource(user.get()));
+        return ResponseEntity.ok(this.fromModelToResource(user.get(), MapFrom.GET));
     }
 }
