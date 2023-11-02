@@ -1,4 +1,4 @@
-package com.edu.pe.usermicroservice.exception;
+package com.edu.pe.usermicroservice.users.exception;
 
 public class ValidationException extends RuntimeException{
     public ValidationException() {

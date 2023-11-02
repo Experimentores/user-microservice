@@ -1,4 +1,4 @@
-package com.edu.pe.usermicroservice.model;
+package com.edu.pe.usermicroservice.trips.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

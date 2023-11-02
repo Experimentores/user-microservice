@@ -1,13 +1,10 @@
-package com.edu.pe.usermicroservice.model;
+package com.edu.pe.usermicroservice.users.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -37,8 +34,5 @@ public class User {
 
     @Column(name = "phone", nullable = false, length = 9)
     private String phone;
-
-    @Transient
-    private List<Trip> trips;
 
 }
