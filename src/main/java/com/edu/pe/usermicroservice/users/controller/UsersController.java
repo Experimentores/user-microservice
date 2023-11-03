@@ -82,8 +82,9 @@ public class UsersController extends CrudController<User, Long, UserResource, Cr
 
     @Override
     protected UserResource fromModelToResource(User user, MapFrom from) {
-        UserResource resource = super.fromModelToResource(user);
-
+        UserResource resource = mapper.fromModelToResource(user);
+        resource.setTrips(List.of());
+        resource.setOrders(List.of());
         if(from != MapFrom.ANY && from != MapFrom.CREATE) {
             resource.setTrips(getUserTrips(user.getId()));
             resource.setOrders(getUserOrders(user.getId()));
