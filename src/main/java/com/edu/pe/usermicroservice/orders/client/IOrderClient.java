@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "order-microservice", path = "/api/tripstore/v1/orders/")
+@FeignClient(name = "${tripstore.orders-service.name}", path = "${tripstore.orders-service.path}")
 public interface IOrderClient {
     @GetMapping(value = "users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<Order>> getOrdersByUserId(@PathVariable Long id);

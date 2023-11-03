@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
-@FeignClient(name = "trip-microservice", path = "api/tripstore/v1/trips/")
+@FeignClient(name = "${tripstore.trips-service.name}",
+        path = "${tripstore.trips-service.path}")
 public interface ITripClient {
     @GetMapping(value = "users/{id}")
     ResponseEntity<List<Trip>> getTrips(@PathVariable Long id);

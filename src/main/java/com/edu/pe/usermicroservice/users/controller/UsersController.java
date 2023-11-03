@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/tripstore/v1/users/")
+@RequestMapping("${tripstore.users-service.path}")
 public class UsersController extends CrudController<User, Long, UserResource, CreateUserResource, UpdateUserResource> {
     private final IUserService userService;
     private final ITripClient tripClient;
