@@ -1,7 +1,5 @@
 package com.edu.pe.usermicroservice.users.resources;
 
-import com.edu.pe.usermicroservice.orders.domain.model.Order;
-import com.edu.pe.usermicroservice.trips.domain.model.Trip;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +16,4 @@ public class UserResource {
     private String lastname;
     private String email;
     private String phone;
-    private List<Trip> trips;
-    private List<Order> orders;
 }

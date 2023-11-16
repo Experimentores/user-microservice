@@ -2,10 +2,9 @@ package com.edu.pe.usermicroservice.users.controller;
 
 import com.crudjpa.controller.CrudController;
 import com.crudjpa.enums.MapFrom;
+import com.crudjpa.util.HttpStatusCheckCode;
 import com.edu.pe.usermicroservice.orders.client.IOrderClient;
-import com.edu.pe.usermicroservice.orders.domain.model.Order;
 import com.edu.pe.usermicroservice.trips.client.ITripClient;
-import com.edu.pe.usermicroservice.trips.domain.model.Trip;
 import com.edu.pe.usermicroservice.users.domain.model.User;
 import com.edu.pe.usermicroservice.users.domain.service.IUserService;
 import com.edu.pe.usermicroservice.users.exception.InvalidCreateResourceException;
@@ -22,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,36 +58,9 @@ public class UsersController extends CrudController<User, Long, UserResource, Cr
         return true;
     }
 
-    private List<Trip> getUserTrips(Long userId) {
-        try {
-            ResponseEntity<List<Trip>> response = tripClient.getTrips(userId);
-            if(response.getStatusCode() == HttpStatus.OK)
-                return response.getBody();
-        } catch (Exception ignored) {}
-
-        return new ArrayList<>();
-    }
-
-    private List<Order> getUserOrders(Long userId) {
-        try {
-            ResponseEntity<List<Order>> response = orderClient.getOrdersByUserId(userId);
-            if(response.getStatusCode() == HttpStatus.OK)
-                return response.getBody();
-        } catch (Exception ignored) {}
-
-        return List.of();
-    }
-
-    @Override
-    protected UserResource fromModelToResource(User user, MapFrom from) {
-        UserResource resource = mapper.fromModelToResource(user);
-        resource.setTrips(List.of());
-        resource.setOrders(List.of());
-        if(from != MapFrom.ANY && from != MapFrom.CREATE) {
-            resource.setTrips(getUserTrips(user.getId()));
-            resource.setOrders(getUserOrders(user.getId()));
-        }
-        return resource;
+    @RequestMapping(value = "healthcheck", method = RequestMethod.HEAD)
+    ResponseEntity<Void> isOk() {
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -120,11 +91,18 @@ public class UsersController extends CrudController<User, Long, UserResource, Cr
         return update(id, resource);
     }
 
+
     @DeleteMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserResource> deleteUserById(@PathVariable Long id) {
+
+        validateHealthClient(tripClient, "trips");
+        validateHealthClient(orderClient, "orders");
+
         ResponseEntity<UserResource> response = delete(id);
-        if(response.getStatusCode() == HttpStatus.OK)
+        if(HttpStatusCheckCode.from(response).isOk()) {
             tripClient.deleteTripByUserId(id);
+            orderClient.deleteOrdersByUserId(id);
+        }
         return response;
     }
 
@@ -137,4 +115,8 @@ public class UsersController extends CrudController<User, Long, UserResource, Cr
 
         return ResponseEntity.ok(this.fromModelToResource(user.get(), MapFrom.GET));
     }
+
+
+
+
 }
